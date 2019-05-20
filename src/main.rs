@@ -1,4 +1,8 @@
-//https://www.samouczekprogramisty.pl/advent-of-code-2016-dzien-3/
+//https://www.samouczekprogramisty.pl/advent-of-code-2016-dzien-4/
+
+extern crate regex;
+use regex::Regex;
+use std::fmt;
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -6,7 +10,7 @@ use std::io::{BufRead, BufReader};
 fn load_data() -> Vec<String> {
     let mut data = Vec::new();
 
-    let file = File::open("./res/triangles.txt").unwrap();
+    let file = File::open("./res/rooms.txt").unwrap();
     for line in BufReader::new(file).lines() {
         data.push(line.unwrap());
     }
@@ -14,49 +18,46 @@ fn load_data() -> Vec<String> {
     data
 }
 
-fn load_edges(lines: &Vec<String>) -> Vec<[u32; 3]> {
-    let mut triangles = Vec::new();
-
-    for line in lines {
-        let edges: Vec<String> = line.rsplit(';').map(|s| s.to_string()).collect();
-
-        triangles.push([
-            edges[0].parse().unwrap(),
-            edges[1].parse().unwrap(),
-            edges[2].parse().unwrap(),
-        ]);
-    }
-
-    triangles
+struct Room {
+    id: String,
+    checksum: String,
 }
 
-fn check_triangularity(data: &[u32; 3]) -> bool {
-    if data[0] + data[1] < data[2] {
-        false
-    } else if data[0] + data[2] < data[1] {
-        false
-    } else if data[2] + data[1] < data[0] {
-        false
-    } else {
-        true
+impl Room {
+    fn create(data: &String) -> Self {
+        let re = Regex::new(r"\[(.*?)\]").unwrap();
+
+        let checksum = re.captures(&data).unwrap().get(1).unwrap();
+
+        let re = Regex::new(r"(^.+?)\[").unwrap();
+
+        let id = re.captures(&data).unwrap().get(1).unwrap();
+
+        Room {
+            id: String::from(id.as_str()),
+            checksum: String::from(checksum.as_str()),
+        }
     }
+
+    
+}
+
+impl fmt::Display for Room {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Room: {}[{}]", self.id, self.checksum)
+    }
+}
+
+fn load_rooms(data: &Vec<String>) -> Vec<Room> {
+    data.iter().map(|data_row| Room::create(data_row)).collect()
 }
 
 fn main() {
-    let triangles = load_edges(&load_data());
+    let lines = load_rooms(&load_data());
 
-    let mut counter = 1;
-    for triangle in triangles {
-        println!(
-            "{}. {:?} : {}",
-            counter,
-            triangle,
-            if check_triangularity(&triangle) {
-                "a Triangle!"
-            } else {
-                "Not a Triangle!"
-            }
-        );
-        counter += 1;
+    for line in lines {
+        println!("{}", line);
     }
+
+
 }
