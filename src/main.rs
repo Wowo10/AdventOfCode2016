@@ -3,54 +3,60 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-fn load_codes() -> Vec<String> {
-    let mut codes = Vec::new();
+fn load_data() -> Vec<String> {
+    let mut data = Vec::new();
 
-    let file = File::open("./res/code.txt").unwrap();
+    let file = File::open("./res/triangles.txt").unwrap();
     for line in BufReader::new(file).lines() {
-        codes.push(line.unwrap());
+        data.push(line.unwrap());
     }
 
-    codes
+    data
+}
+
+fn load_edges(lines: &Vec<String>) -> Vec<[u32; 3]> {
+    let mut triangles = Vec::new();
+
+    for line in lines {
+        let edges: Vec<String> = line.rsplit(';').map(|s| s.to_string()).collect();
+
+        triangles.push([
+            edges[0].parse().unwrap(),
+            edges[1].parse().unwrap(),
+            edges[2].parse().unwrap(),
+        ]);
+    }
+
+    triangles
+}
+
+fn check_triangularity(data: &[u32; 3]) -> bool {
+    if data[0] + data[1] < data[2] {
+        false
+    } else if data[0] + data[2] < data[1] {
+        false
+    } else if data[2] + data[1] < data[0] {
+        false
+    } else {
+        true
+    }
 }
 
 fn main() {
-    let code_table = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+    let triangles = load_edges(&load_data());
 
-    let codes = load_codes();
-
-    let mut position_x = 1;
-    let mut position_y = 1;
-
-    for code in &codes {
-        for c in code.chars() {
-            match c {
-                'U' => {
-                    if position_y != 0 {
-                        position_y -= 1;
-                    }
-                }
-                'L' => {
-                    if position_x != 0 {
-                        position_x -= 1;
-                    }
-                }
-                'D' => {
-                    if position_y != 2 {
-                        position_y += 1;
-                    }
-                }
-                'R' => {
-                    if position_x != 2 {
-                        position_x += 1;
-                    }
-                }
-                _ => {
-                    //do nothing
-                }
+    let mut counter = 1;
+    for triangle in triangles {
+        println!(
+            "{}. {:?} : {}",
+            counter,
+            triangle,
+            if check_triangularity(&triangle) {
+                "a Triangle!"
+            } else {
+                "Not a Triangle!"
             }
-        }
-        print!("{}", code_table[position_y][position_x]);
+        );
+        counter += 1;
     }
-    println!("");
 }
