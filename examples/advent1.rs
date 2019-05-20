@@ -52,15 +52,15 @@ enum Heading {
 }
 
 impl Heading {
-    fn turn(&mut self, direction: &Direction) -> Heading {
+    fn turn(&mut self, direction: &Direction) {
         match direction {
             Direction::Left => self.turn_left(),
             Direction::Right => self.turn_right(),
         }
     }
 
-    fn turn_left(&mut self) -> Heading {
-        match self {
+    fn turn_left(&mut self) {
+        *self = match self {
             Heading::North => Heading::West,
             Heading::West => Heading::South,
             Heading::South => Heading::East,
@@ -68,8 +68,8 @@ impl Heading {
         }
     }
 
-    fn turn_right(&mut self) -> Heading {
-        match self {
+    fn turn_right(&mut self) {
+        *self = match self {
             Heading::North => Heading::East,
             Heading::West => Heading::North,
             Heading::South => Heading::West,
@@ -105,7 +105,7 @@ impl Position {
     }
 
     fn change(&mut self, mov: &Move) {
-        self.heading = self.heading.turn(&mov.direction);
+        self.heading.turn(&mov.direction);
 
         match self.heading {
             Heading::North => {
